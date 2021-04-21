@@ -121,7 +121,20 @@ elif sys.platform == 'darwin':
 
     elif exists_conda_env():
         # conda package.
-        _lgeos = CDLL(os.path.join(sys.prefix, 'lib', 'libgeos_c.dylib'))
+        alt_paths = [
+            # The Framework build from Kyng Chaos
+            "/Library/Frameworks/GEOS.framework/Versions/Current/GEOS",
+            # macports
+            '/opt/local/lib/libgeos_c.dylib',
+            # homebrew
+            '/usr/local/lib/libgeos_c.dylib',
+            # homebrew apple silicon M1
+            "/opt/homebrew/lib/libgeos_c.dylib",
+        ]
+        try:
+            _lgeos = CDLL(os.path.join(sys.prefix, 'lib', 'libgeos_c.dylib'))
+        except:
+            _lgeos = load_dll('geos_c', fallbacks=alt_paths)
     else:
         if hasattr(sys, 'frozen'):
             try:
@@ -144,6 +157,8 @@ elif sys.platform == 'darwin':
                 '/opt/local/lib/libgeos_c.dylib',
                 # homebrew
                 '/usr/local/lib/libgeos_c.dylib',
+                # homebrew apple silicon M1
+                "/opt/homebrew/lib/libgeos_c.dylib",
             ]
         _lgeos = load_dll('geos_c', fallbacks=alt_paths)
 
